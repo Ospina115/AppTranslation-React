@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "AppTranslation",
+    "slug": "app-translation-react",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A90D9"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Esta aplicación necesita acceso al micrófono para las actividades de pronunciación.",
+        "NSSpeechRecognitionUsageDescription": "Esta aplicación necesita reconocimiento de voz para evaluar tu pronunciación."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4A90D9"
+      },
+      "permissions": [
+        "RECORD_AUDIO",
+        "INTERNET"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Esta aplicación necesita acceso al micrófono para los ejercicios de pronunciación."
+        }
+      ]
+    ]
+  }
+}
