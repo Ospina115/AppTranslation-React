@@ -1,117 +1,81 @@
-import * as Speech from 'expo-speech';
-import { Audio } from 'expo-av';
 import { calculateSimilarity } from '../utils/helpers';
 
-/**
- * Reproduce un texto en voz alta usando síntesis de voz.
- */
 async function speakText(text, options = {}) {
-  const defaultOptions = {
-    language: 'en-US',
-    pitch: 1.0,
-    rate: 0.85, // Velocidad ligeramente más lenta para mejor aprendizaje
-    ...options,
-  };
-
-  return new Promise((resolve, reject) => {
-    Speech.speak(text, {
-      ...defaultOptions,
-      onDone: () => resolve({ success: true }),
-      onError: (error) => reject(error),
-    });
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) {
+      resolve({ success: false, error: 'Speech synthesis not supported' });
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = options.language || 'en-US';
+    utterance.rate = options.rate !== undefined ? options.rate : 0.85;
+    utterance.pitch = options.pitch !== undefined ? options.pitch : 1.0;
+    utterance.onend = () => resolve({ success: true });
+    utterance.onerror = () => resolve({ success: false });
+    window.speechSynthesis.speak(utterance);
   });
 }
 
-/**
- * Detiene la síntesis de voz en curso.
- */
-async function stopSpeaking() {
-  await Speech.stop();
+function stopSpeaking() {
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
 }
 
-/**
- * Verifica si actualmente se está reproduciendo audio.
- */
-async function isSpeaking() {
-  return await Speech.isSpeakingAsync();
+function isSpeaking() {
+  return window.speechSynthesis ? window.speechSynthesis.speaking : false;
 }
 
-/**
- * Inicia la grabación de audio del micrófono.
- * Retorna el objeto de grabación para controlarlo externamente.
- */
 async function startRecording() {
   try {
-    const permission = await Audio.requestPermissionsAsync();
-    if (!permission.granted) {
-      return { success: false, error: 'Permiso de micrófono denegado.' };
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return { success: false, error: 'Grabación de audio no soportada en este navegador.' };
     }
-
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
-
-    const recording = new Audio.Recording();
-    await recording.prepareToRecordAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY
-    );
-    await recording.startAsync();
-
-    return { success: true, recording };
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chunks = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+    mediaRecorder.start();
+    return { success: true, stream, mediaRecorder, chunks };
   } catch (error) {
     console.error('Start recording error:', error);
     return { success: false, error: 'No se pudo iniciar la grabación.' };
   }
 }
 
-/**
- * Detiene la grabación y devuelve la URI del archivo de audio.
- */
-async function stopRecording(recording) {
+async function stopRecording(recordingObj) {
   try {
-    await recording.stopAndUnloadAsync();
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-    const uri = recording.getURI();
-    return { success: true, uri };
+    const { mediaRecorder, stream } = recordingObj;
+    return new Promise((resolve) => {
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        resolve({ success: true, uri: null });
+      };
+      mediaRecorder.stop();
+    });
   } catch (error) {
     console.error('Stop recording error:', error);
     return { success: false, error: 'Error al detener la grabación.' };
   }
 }
 
-/**
- * Simula el reconocimiento de voz comparando con el texto esperado.
- *
- * NOTA PARA PRODUCCIÓN: Integrar aquí un API de Speech-to-Text como:
- * - Google Cloud Speech-to-Text
- * - Azure Cognitive Services Speech
- * - OpenAI Whisper API
- *
- * Para el MVP de demostración se usa una simulación.
- */
 async function recognizeSpeech(audioUri, expectedPhrase) {
-  // Simulación para desarrollo - en producción enviar audioUri al API de STT
   await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  // Simulación: variación aleatoria del resultado para demo
-  const simulationScore = Math.floor(Math.random() * 40) + 60; // 60-100
+  const simulationScore = Math.floor(Math.random() * 40) + 60;
   const words = expectedPhrase.split(' ');
   const recognizedWords = words.filter(() => Math.random() > 0.15);
   const recognizedText = recognizedWords.join(' ');
-
   return {
     success: true,
     recognizedText,
     confidence: simulationScore / 100,
     score: simulationScore,
-    // En producción: score = calculateSimilarity(expectedPhrase, recognizedText)
   };
 }
 
-/**
- * Evalúa la pronunciación comparando el texto reconocido con el esperado.
- */
 function evaluatePronunciation(expectedPhrase, recognizedText) {
   const score = calculateSimilarity(expectedPhrase, recognizedText);
   return {

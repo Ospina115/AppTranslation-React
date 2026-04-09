@@ -1,8 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS, USER_ROLES } from '../utils/constants';
 import { generateId } from '../utils/helpers';
 
-// Usuario administrador por defecto
 const DEFAULT_ADMIN = {
   id: 'admin_001',
   name: 'Administrador',
@@ -12,32 +10,22 @@ const DEFAULT_ADMIN = {
   createdAt: new Date().toISOString(),
 };
 
-/**
- * Inicializa la base de datos de usuarios con el admin por defecto.
- */
-async function initUsersDB() {
+function initUsersDB() {
   try {
-    const existing = await AsyncStorage.getItem(STORAGE_KEYS.USERS_DB);
+    const existing = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     if (!existing) {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.USERS_DB,
-        JSON.stringify([DEFAULT_ADMIN])
-      );
+      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify([DEFAULT_ADMIN]));
     }
   } catch (error) {
     console.error('Error initializing users DB:', error);
   }
 }
 
-/**
- * Obtiene todos los usuarios (solo para admin).
- */
-async function getAllUsers() {
+function getAllUsers() {
   try {
-    await initUsersDB();
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.USERS_DB);
+    initUsersDB();
+    const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
-    // Excluir contraseñas en la respuesta
     return users.map(({ password, ...user }) => user);
   } catch (error) {
     console.error('Error getting users:', error);
@@ -45,16 +33,12 @@ async function getAllUsers() {
   }
 }
 
-/**
- * Registra un nuevo estudiante.
- */
 async function register({ name, email, password }) {
   try {
-    await initUsersDB();
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.USERS_DB);
+    initUsersDB();
+    const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
 
-    // Verificar si el email ya existe
     const emailExists = users.some(
       (u) => u.email.toLowerCase() === email.toLowerCase()
     );
@@ -73,7 +57,7 @@ async function register({ name, email, password }) {
     };
 
     users.push(newUser);
-    await AsyncStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(users));
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(users));
 
     const { password: _, ...safeUser } = newUser;
     return { success: true, user: safeUser };
@@ -83,13 +67,10 @@ async function register({ name, email, password }) {
   }
 }
 
-/**
- * Inicia sesión con email y contraseña.
- */
 async function login({ email, password }) {
   try {
-    await initUsersDB();
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.USERS_DB);
+    initUsersDB();
+    const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
 
     const user = users.find(
@@ -102,14 +83,10 @@ async function login({ email, password }) {
       return { success: false, error: 'Correo o contraseña incorrectos.' };
     }
 
-    // Actualizar último login
     const updatedUsers = users.map((u) =>
       u.id === user.id ? { ...u, lastLogin: new Date().toISOString() } : u
     );
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.USERS_DB,
-      JSON.stringify(updatedUsers)
-    );
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(updatedUsers));
 
     const { password: _, ...safeUser } = user;
     return { success: true, user: safeUser };
@@ -119,23 +96,17 @@ async function login({ email, password }) {
   }
 }
 
-/**
- * Guarda la sesión del usuario en almacenamiento local.
- */
-async function saveSession(user) {
+function saveSession(user) {
   try {
-    await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   } catch (error) {
     console.error('Error saving session:', error);
   }
 }
 
-/**
- * Recupera la sesión guardada.
- */
-async function getSession() {
+function getSession() {
   try {
-    const data = await AsyncStorage.getItem(STORAGE_KEYS.USER);
+    const data = localStorage.getItem(STORAGE_KEYS.USER);
     return data ? JSON.parse(data) : null;
   } catch (error) {
     console.error('Error getting session:', error);
@@ -143,12 +114,9 @@ async function getSession() {
   }
 }
 
-/**
- * Cierra la sesión del usuario.
- */
-async function logout() {
+function logout() {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEYS.USER);
+    localStorage.removeItem(STORAGE_KEYS.USER);
   } catch (error) {
     console.error('Logout error:', error);
   }

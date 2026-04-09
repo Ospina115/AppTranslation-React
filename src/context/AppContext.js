@@ -9,10 +9,10 @@ export function AppProvider({ children }) {
   const [progress, setProgress] = useState(null);
   const [loadingProgress, setLoadingProgress] = useState(false);
 
-  const loadProgress = useCallback(async () => {
+  const loadProgress = useCallback(() => {
     if (!user) return;
     setLoadingProgress(true);
-    const p = await progressService.getUserProgress(user.id);
+    const p = progressService.getUserProgress(user.id);
     setProgress(p);
     setLoadingProgress(false);
   }, [user]);

@@ -8,18 +8,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Restaurar sesión al iniciar la app
-    (async () => {
-      const savedUser = await authService.getSession();
-      setUser(savedUser);
-      setLoading(false);
-    })();
+    const savedUser = authService.getSession();
+    setUser(savedUser);
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     const result = await authService.login({ email, password });
     if (result.success) {
-      await authService.saveSession(result.user);
+      authService.saveSession(result.user);
       setUser(result.user);
     }
     return result;
@@ -28,14 +25,14 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     const result = await authService.register({ name, email, password });
     if (result.success) {
-      await authService.saveSession(result.user);
+      authService.saveSession(result.user);
       setUser(result.user);
     }
     return result;
   };
 
-  const logout = async () => {
-    await authService.logout();
+  const logout = () => {
+    authService.logout();
     setUser(null);
   };
 
