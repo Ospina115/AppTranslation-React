@@ -69,16 +69,17 @@ async function recordExerciseComplete(userId, { topicId, lessonId, exerciseId, s
     };
     progress.exerciseHistory = [historyEntry, ...progress.exerciseHistory].slice(0, 200);
 
-    if (!progress.topicsProgress[topicId]) {
-      progress.topicsProgress[topicId] = {
-        topicId,
+    const safeTopicId = String(topicId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    if (!Object.prototype.hasOwnProperty.call(progress.topicsProgress, safeTopicId)) {
+      progress.topicsProgress[safeTopicId] = {
+        topicId: safeTopicId,
         completedLessons: [],
         totalScore: 0,
         exercisesCount: 0,
         averageScore: 0,
       };
     }
-    const tp = progress.topicsProgress[topicId];
+    const tp = progress.topicsProgress[safeTopicId];
     tp.totalScore += score;
     tp.exercisesCount += 1;
     tp.averageScore = Math.round(tp.totalScore / tp.exercisesCount);
@@ -94,14 +95,15 @@ async function recordExerciseComplete(userId, { topicId, lessonId, exerciseId, s
 async function markLessonComplete(userId, topicId, lessonId) {
   try {
     const progress = getUserProgress(userId);
-    const lessonKey = `${topicId}_${lessonId}`;
+    const safeTopicId = String(topicId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const lessonKey = `${safeTopicId}_${lessonId}`;
 
     if (!progress.completedLessons.includes(lessonKey)) {
       progress.completedLessons.push(lessonKey);
       progress.totalPoints += 50;
 
-      if (progress.topicsProgress[topicId]) {
-        const tp = progress.topicsProgress[topicId];
+      if (Object.prototype.hasOwnProperty.call(progress.topicsProgress, safeTopicId)) {
+        const tp = progress.topicsProgress[safeTopicId];
         if (!tp.completedLessons.includes(lessonId)) {
           tp.completedLessons.push(lessonId);
         }

@@ -1,9 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { IoHomeOutline, IoBookOutline, IoChatbubblesOutline, IoBarChartOutline, IoPersonOutline } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
 
 import LoginScreen from './screens/auth/LoginScreen';
 import RegisterScreen from './screens/auth/RegisterScreen';
