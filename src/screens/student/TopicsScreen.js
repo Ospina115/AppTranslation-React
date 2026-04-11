@@ -1,11 +1,10 @@
-import React from 'react';
+import { IoCheckmarkCircle, IoLockClosed } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
-import { IoLockClosed, IoCheckmarkCircle } from 'react-icons/io5';
-import { useAppContext } from '../../context/AppContext';
 import ProgressBar from '../../components/common/ProgressBar';
-import { DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '../../utils/constants';
-import { getAvailableTopics } from '../../data/topics';
+import { useAppContext } from '../../context/AppContext';
 import { getLessonsForTopic } from '../../data/exercises';
+import { getAvailableTopics } from '../../data/topics';
+import { DIFFICULTY_COLORS, DIFFICULTY_LABELS } from '../../utils/constants';
 
 export default function TopicsScreen() {
   const { progress, getTopicProgress } = useAppContext();
@@ -25,9 +24,30 @@ export default function TopicsScreen() {
 
   const groups = groupByDifficulty(topics);
   const difficulties = ['beginner', 'intermediate', 'advanced'];
+  const completedLessons = progress?.completedLessons?.length || 0;
+  const completedTopics = progress?.completedTopics?.length || 0;
 
   return (
-    <div className="screen-container">
+    <div className="screen-container topics-screen">
+      <section className="topics-hero">
+        <div>
+          <p className="topics-eyebrow">Mapa de aprendizaje</p>
+          <h2 className="topics-title">Temas disponibles</h2>
+          <p className="topics-subtitle">Avanza por niveles y desbloquea nuevo contenido.</p>
+        </div>
+        <div className="topics-hero-stats">
+          <div className="topics-hero-stat">
+            <span className="topics-hero-value">{completedLessons}</span>
+            <span className="topics-hero-label">Lecciones</span>
+          </div>
+          <div className="topics-hero-divider" />
+          <div className="topics-hero-stat">
+            <span className="topics-hero-value">{completedTopics}</span>
+            <span className="topics-hero-label">Temas</span>
+          </div>
+        </div>
+      </section>
+
       {difficulties.map((difficulty) => {
         const group = groups[difficulty];
         if (!group || group.length === 0) return null;

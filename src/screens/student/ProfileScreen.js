@@ -1,15 +1,15 @@
-import React from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useAppContext } from '../../context/AppContext';
-import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { getUserLevel, formatDate } from '../../utils/helpers';
+import Card from '../../components/common/Card';
+import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
+import { formatDate, getUserLevel } from '../../utils/helpers';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { progress } = useAppContext();
 
   const level = getUserLevel(progress?.totalPoints || 0);
+  const firstName = user?.name?.split(' ')[0] || 'Estudiante';
 
   const handleLogout = () => {
     const confirmed = window.confirm('¿Seguro que quieres cerrar sesión?');
@@ -17,8 +17,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <div className="screen-container">
-      <h2 className="screen-title">👤 Mi Perfil</h2>
+    <div className="screen-container profile-screen">
+      <section className="profile-hero">
+        <div>
+          <p className="profile-eyebrow">Cuenta de estudiante</p>
+          <h2 className="screen-title">Mi perfil</h2>
+          <p className="profile-subtitle">Hola {firstName}, revisa tu avance y datos de cuenta.</p>
+        </div>
+      </section>
 
       <Card className="profile-card">
         <div className="profile-avatar">

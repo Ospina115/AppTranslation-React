@@ -10,11 +10,40 @@ const DEFAULT_ADMIN = {
   createdAt: new Date().toISOString(),
 };
 
+const DEFAULT_STUDENT = {
+  id: 'student_001',
+  name: 'Estudiante Demo',
+  email: 'estudiante@apptranslation.edu',
+  password: 'Student123!',
+  role: USER_ROLES.STUDENT,
+  createdAt: new Date().toISOString(),
+  lastLogin: null,
+};
+
+const DEFAULT_USERS = [DEFAULT_ADMIN, DEFAULT_STUDENT];
+
 function initUsersDB() {
   try {
     const existing = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     if (!existing) {
-      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify([DEFAULT_ADMIN]));
+      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(DEFAULT_USERS));
+      return;
+    }
+
+    const users = JSON.parse(existing);
+    const mergedUsers = [...users];
+
+    DEFAULT_USERS.forEach((defaultUser) => {
+      const alreadyExists = mergedUsers.some(
+        (u) => u.email?.toLowerCase() === defaultUser.email.toLowerCase()
+      );
+      if (!alreadyExists) {
+        mergedUsers.push(defaultUser);
+      }
+    });
+
+    if (mergedUsers.length !== users.length) {
+      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(mergedUsers));
     }
   } catch (error) {
     console.error('Error initializing users DB:', error);
@@ -25,7 +54,7 @@ function getAllUsers() {
   try {
     initUsersDB();
     const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
-    const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
+    const users = data ? JSON.parse(data) : DEFAULT_USERS;
     return users.map(({ password, ...user }) => user);
   } catch (error) {
     console.error('Error getting users:', error);
@@ -37,7 +66,7 @@ async function register({ name, email, password }) {
   try {
     initUsersDB();
     const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
-    const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
+    const users = data ? JSON.parse(data) : DEFAULT_USERS;
 
     const emailExists = users.some(
       (u) => u.email.toLowerCase() === email.toLowerCase()
@@ -71,7 +100,7 @@ async function login({ email, password }) {
   try {
     initUsersDB();
     const data = localStorage.getItem(STORAGE_KEYS.USERS_DB);
-    const users = data ? JSON.parse(data) : [DEFAULT_ADMIN];
+    const users = data ? JSON.parse(data) : DEFAULT_USERS;
 
     const user = users.find(
       (u) =>

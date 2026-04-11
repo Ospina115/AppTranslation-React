@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { IoEyeOffOutline, IoEyeOutline, IoInformationCircleOutline, IoLockClosedOutline, IoMailOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
-import { IoMailOutline, IoLockClosedOutline, IoEyeOutline, IoEyeOffOutline, IoInformationCircleOutline } from 'react-icons/io5';
-import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -94,7 +94,7 @@ export default function LoginScreen() {
 
           <div className="hint-box">
             <IoInformationCircleOutline size={14} />
-            <span className="hint-text">Admin: admin@apptranslation.edu / Admin123!</span>
+            <span className="hint-text">Admin: admin@apptranslation.edu / Admin123! | Estudiante: estudiante@apptranslation.edu / Student123!</span>
           </div>
 
           <div className="divider">

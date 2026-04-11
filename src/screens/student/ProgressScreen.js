@@ -1,11 +1,10 @@
-import React from 'react';
-import { useAppContext } from '../../context/AppContext';
-import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/common/Card';
 import ProgressBar from '../../components/common/ProgressBar';
-import { getUserLevel, formatDate } from '../../utils/helpers';
-import { TOPICS } from '../../data/topics';
+import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { getLessonsForTopic } from '../../data/exercises';
+import { TOPICS } from '../../data/topics';
+import { formatDate, getUserLevel } from '../../utils/helpers';
 
 export default function ProgressScreen() {
   const { user } = useAuth();
@@ -13,28 +12,49 @@ export default function ProgressScreen() {
 
   const level = getUserLevel(progress?.totalPoints || 0);
   const recentHistory = (progress?.exerciseHistory || []).slice(0, 10);
+  const totalPoints = progress?.totalPoints || 0;
+  const streak = progress?.streak || 0;
+  const completedLessons = progress?.completedLessons?.length || 0;
+  const totalExercises = progress?.exerciseHistory?.length || 0;
+  const averageScore = totalExercises
+    ? Math.round(
+        (progress.exerciseHistory.reduce((acc, entry) => acc + (entry.score || 0), 0) /
+          totalExercises)
+      )
+    : 0;
+  const firstName = user?.name?.split(' ')[0] || 'Estudiante';
 
   return (
-    <div className="screen-container">
-      <h2 className="screen-title">�� Mi Progreso</h2>
+    <div className="screen-container progress-screen">
+      <section className="progress-hero">
+        <div>
+          <p className="progress-eyebrow">Panel de rendimiento</p>
+          <h2 className="screen-title">Mi progreso</h2>
+          <p className="progress-subtitle">{firstName}, este es tu avance en el entrenamiento de hoy.</p>
+        </div>
+        <div className="progress-level-chip">
+          <span className="progress-level-label">Nivel</span>
+          <span className="progress-level-value">{level.level}</span>
+        </div>
+      </section>
 
       <Card className="progress-summary-card">
         <div className="progress-summary-row">
           <div className="progress-summary-item">
-            <span className="summary-value">{progress?.totalPoints || 0}</span>
+            <span className="summary-value">{totalPoints}</span>
             <span className="summary-label">Puntos</span>
           </div>
           <div className="progress-summary-item">
-            <span className="summary-value">{progress?.streak || 0}</span>
+            <span className="summary-value">{streak}</span>
             <span className="summary-label">Días seguidos</span>
           </div>
           <div className="progress-summary-item">
-            <span className="summary-value">{progress?.completedLessons?.length || 0}</span>
+            <span className="summary-value">{completedLessons}</span>
             <span className="summary-label">Lecciones</span>
           </div>
           <div className="progress-summary-item">
-            <span className="summary-value">{level.level}</span>
-            <span className="summary-label">Nivel</span>
+            <span className="summary-value">{averageScore}%</span>
+            <span className="summary-label">Promedio</span>
           </div>
         </div>
       </Card>

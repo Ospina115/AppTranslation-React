@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ChatMessage from '../../components/chat/ChatMessage';
+import { useEffect, useRef, useState } from 'react';
 import ChatInput from '../../components/chat/ChatInput';
+import ChatMessage from '../../components/chat/ChatMessage';
 import aiService from '../../services/aiService';
 
 const TOPIC_OPTIONS = [
@@ -41,7 +41,7 @@ export default function ChatbotScreen() {
   };
 
   return (
-    <div className="chatbot-screen">
+    <div className="screen-container chatbot-screen">
       <div className="chatbot-header">
         <h2 className="chatbot-title">🤖 Chatbot IA</h2>
         <p className="chatbot-subtitle">Practica inglés con tu asistente</p>
@@ -59,24 +59,26 @@ export default function ChatbotScreen() {
         ))}
       </div>
 
-      <div className="chat-messages">
-        {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
-        ))}
-        {loading && (
-          <div className="chat-message-row bot">
-            <div className="chat-avatar"><span>🤖</span></div>
-            <div className="chat-bubble bot typing">
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
+      <div className="chat-panel">
+        <div className="chat-messages">
+          {messages.map((msg) => (
+            <ChatMessage key={msg.id} message={msg} />
+          ))}
+          {loading && (
+            <div className="chat-message-row bot">
+              <div className="chat-avatar"><span>🤖</span></div>
+              <div className="chat-bubble bot typing">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-      <ChatInput onSend={handleSend} disabled={loading} />
+        <ChatInput onSend={handleSend} disabled={loading} />
+      </div>
     </div>
   );
 }
